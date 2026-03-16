@@ -19,4 +19,13 @@ public class GoogleBookService {
 						.queryParam("startIndex", startIndex != null ? startIndex : 0).build())
 				.retrieve().body(GoogleBook.class);
 	}
+	
+	public GoogleVolume getVolumeById(String volumeId) {
+		if (volumeId == null || volumeId.isBlank()) {
+			throw new IllegalArgumentException("volumeId must not be null or blank");
+		}
+
+		return restClient.get().uri(uriBuilder -> uriBuilder.path("/volumes/{id}").build(volumeId)).retrieve()
+				.body(GoogleVolume.class);
+	}
 }
