@@ -1,6 +1,7 @@
 package com.example.demo.controller;
 
 import com.example.demo.db.entity.Book;
+import com.example.demo.exception.BadRequestException;
 import com.example.demo.google.GoogleBook;
 import com.example.demo.google.GoogleBookService;
 import com.example.demo.service.BookService;
@@ -36,6 +37,9 @@ public class BookController {
 	
 	@PostMapping("/books/{googleId}")
 	public ResponseEntity<?> addBook(@PathVariable String googleId) {
+		if (googleId == null || googleId.isBlank()) {
+			throw new BadRequestException("Google ID must not be null or blank");
+		}
 		return bookService.addBook(googleId);
 	}
 }

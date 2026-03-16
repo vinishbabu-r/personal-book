@@ -1,8 +1,12 @@
 package com.example.demo.google;
 
+import java.io.IOException;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
+
+import com.example.demo.exception.NotFoundException;
 
 @Service
 public class GoogleBookService {
@@ -21,11 +25,16 @@ public class GoogleBookService {
 	}
 	
 	public GoogleVolume getVolumeById(String volumeId) {
-		if (volumeId == null || volumeId.isBlank()) {
-			throw new IllegalArgumentException("volumeId must not be null or blank");
-		}
-
 		return restClient.get().uri(uriBuilder -> uriBuilder.path("/volumes/{id}").build(volumeId)).retrieve()
-				.body(GoogleVolume.class);
+				.onStatus(status -> status.value() != 200, (request, response) -> {
+					String detail;
+					try {
+						detail = response.getBody() != null ? new String(response.getBody().readAllBytes())
+								: "Resource not found";
+					} catch (IOException e) {
+						detail = "Resource not found";
+					}
+					throw new NotFoundException("Volume %s not found. %s".formatted(volumeId, detail));
+				}).body(GoogleVolume.class);
 	}
 }
