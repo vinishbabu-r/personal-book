@@ -4,6 +4,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
+
+import com.example.demo.db.entity.Book;
+import com.example.demo.db.repository.BookRepository;
+
 import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
