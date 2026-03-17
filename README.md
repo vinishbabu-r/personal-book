@@ -23,6 +23,7 @@ Make sure you have the following installed:
 ```bash
 git clone https://github.com/vinishbabu-r/personal-book.git
 cd personal-book
+git checkout feature/personal-book_vinish 
 ```
 
 ### **2. Build the project**
