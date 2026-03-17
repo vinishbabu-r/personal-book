@@ -1,7 +1,6 @@
 package com.example.demo.service;
 
 import java.net.URI;
-import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,11 +27,6 @@ public class BookService {
 	public BookService(GoogleBookService googleBookService, BookRepository bookRepository) {
 		this.googleBookService = googleBookService;
 		this.bookRepository = bookRepository;
-	}
-	
-	
-	public List<Book> getAllBooks() {
-		return bookRepository.findAll();
 	}
 	
 	

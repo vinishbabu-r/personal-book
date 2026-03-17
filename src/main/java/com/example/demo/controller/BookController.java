@@ -1,6 +1,7 @@
 package com.example.demo.controller;
 
 import com.example.demo.db.entity.Book;
+import com.example.demo.db.repository.BookRepository;
 import com.example.demo.exception.BadRequestException;
 import com.example.demo.google.GoogleBook;
 import com.example.demo.google.GoogleBookService;
@@ -16,16 +17,18 @@ import java.util.List;
 public class BookController {
 	private final BookService bookService;
 	private final GoogleBookService googleBookService;
+	private final BookRepository bookRepository;
 
 	@Autowired
-	public BookController(BookService bookService, GoogleBookService googleBookService) {
+	public BookController(BookService bookService, GoogleBookService googleBookService, BookRepository bookRepository) {
 		this.bookService = bookService;
 		this.googleBookService = googleBookService;
+		this.bookRepository = bookRepository;
 	}
 
 	@GetMapping("/books")
 	public List<Book> getAllBooks() {
-		return bookService.getAllBooks();
+		return bookRepository.findAll();
 	}
 
 	@GetMapping("/google")

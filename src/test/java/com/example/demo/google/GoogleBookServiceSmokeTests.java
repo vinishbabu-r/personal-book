@@ -34,4 +34,10 @@ class GoogleBookServiceSmokeTests {
         assertThat(first.searchInfo()).isNotNull();
         assertThat(first.searchInfo().textSnippet()).isNotNull();
     }
+    
+    @Test
+    void search_volumnById() {
+    	GoogleVolume result = googleBookService.getVolumeById("piOyzYqeZGgC");
+        assertThat(result).isNotNull();
+    }
 }

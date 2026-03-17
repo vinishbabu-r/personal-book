@@ -2,6 +2,7 @@ package com.example.demo;
 
 import com.example.demo.db.entity.Book;
 import com.example.demo.db.repository.BookRepository;
+import com.example.demo.service.BookService;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,6 +14,7 @@ import org.springframework.web.context.WebApplicationContext;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -20,25 +22,38 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @Transactional
 class BookControllerTests {
-    @Autowired
-    private MockMvc mockMvc;
-    @Autowired
-    private WebApplicationContext context;
-    @Autowired
-    private BookRepository bookRepository;
+	@Autowired
+	private MockMvc mockMvc;
+	@Autowired
+	private WebApplicationContext context;
+	@Autowired
+	private BookRepository bookRepository;
+	@Autowired
+	private BookService bookService;
 
-    @BeforeEach
-    void setup() {
-        bookRepository.deleteAll();
-        bookRepository.save(new Book("lRtdEAAAQBAJ", "Spring in Action", "Craig Walls"));
-        bookRepository.save(new Book("12muzgEACAAJ", "Effective Java", "Joshua Bloch"));
-    }
+	@BeforeEach
+	void setup() {
+		bookRepository.deleteAll();
+		bookRepository.save(new Book("lRtdEAAAQBAJ", "Spring in Action", "Craig Walls"));
+		bookRepository.save(new Book("12muzgEACAAJ", "Effective Java", "Joshua Bloch"));
+	}
 
-    @Test
-    void testGetAllBooks() throws Exception {
-        mockMvc.perform(get("/books"))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$[0].title").value("Spring in Action"))
-            .andExpect(jsonPath("$[1].title").value("Effective Java"));
-    }
+	@Test
+	void testGetAllBooks() throws Exception {
+		mockMvc.perform(get("/books")).andExpect(status().isOk())
+				.andExpect(jsonPath("$[0].title").value("Spring in Action"))
+				.andExpect(jsonPath("$[1].title").value("Effective Java"));
+	}
+
+	@Test
+	void testAddBook() throws Exception {
+		String googleId = "piOyzYqeZGgC";
+
+		//Empty Google ID
+		mockMvc.perform(post("/books/ ")).andExpect(status().isBadRequest());
+		
+		//Success Response - 404 if Quota exceeded for quota metric 'Queries' and limit 'Queries per day'
+		mockMvc.perform(post("/books/"+googleId)).andExpect(status().isCreated());
+	}
+
 }
