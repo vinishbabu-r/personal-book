@@ -39,5 +39,10 @@ class GoogleBookServiceSmokeTests {
     void search_volumnById() {
     	GoogleVolume result = googleBookService.getVolumeById("piOyzYqeZGgC");
         assertThat(result).isNotNull();
-    }
+        assertThat(result.id()).isEqualTo("piOyzYqeZGgC");
+        assertThat(result.volumeInfo()).isNotNull();
+        assertThat(result.volumeInfo().title()).isEqualTo("Effective Java");
+        assertThat(result.volumeInfo().authors().get(0)).isEqualTo("Joshua Bloch");
+        assertThat(result.volumeInfo().pageCount()).isEqualTo(265);
+    } 
 }

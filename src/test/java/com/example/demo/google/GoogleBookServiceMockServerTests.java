@@ -40,21 +40,17 @@ class GoogleBookServiceMockServerTests {
         registry.add("google.books.base-url", () -> server.url("/").toString());
     }
 
-    @BeforeEach
-    void enqueueResponse() throws IOException {
-        Path path = Paths.get("src", "test", "resources", "effectivejava.json");
-        String body = Files.readString(path);
-        server.enqueue(new MockResponse()
-                .setResponseCode(200)
-                .addHeader("Content-Type", "application/json")
-                .setBody(body));
-    }
-
     @Autowired
     private GoogleBookService googleBookService;
 
     @Test
-    void search_mocked_returnsEffectiveJava() {
+    void search_mocked_returnsEffectiveJava() throws IOException {
+    	 Path path = Paths.get("src", "test", "resources", "effectivejava.json");
+         String body = Files.readString(path);
+         server.enqueue(new MockResponse()
+                 .setResponseCode(200)
+                 .addHeader("Content-Type", "application/json")
+                 .setBody(body));
         GoogleBook result = googleBookService.searchBooks("effective+java", 5, 0);
         assertThat(result).isNotNull();
         assertThat(result.kind()).isEqualTo("books#volumes");
@@ -62,4 +58,26 @@ class GoogleBookServiceMockServerTests {
         GoogleBook.Item first = result.items().get(0);
         assertThat(first.volumeInfo().title()).isEqualTo("Effective Java");
     }
+    
+    @Test
+    void search_mocked_returnsVolume()throws IOException {
+
+    	Path path = Paths.get("src", "test", "resources", "volumn.json");
+        String body = Files.readString(path);
+        server.enqueue(new MockResponse()
+                .setResponseCode(200)
+                .addHeader("Content-Type", "application/json")
+                .setBody(body));
+
+        GoogleVolume result = googleBookService.getVolumeById("piOyzYqeZGgC");
+        System.out.println("return: "+result.toString());
+        assertThat(result).isNotNull();
+        assertThat(result.id()).isEqualTo("piOyzYqeZGgC");
+        assertThat(result.volumeInfo()).isNotNull();
+        assertThat(result.volumeInfo().title()).isEqualTo("Effective Java");
+        assertThat(result.volumeInfo().authors().get(0)).isEqualTo("Joshua Bloch");
+        assertThat(result.volumeInfo().pageCount()).isEqualTo(260);
+
+    }
+    
 }

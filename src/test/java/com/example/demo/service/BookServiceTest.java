@@ -1,8 +1,10 @@
 package com.example.demo.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
@@ -20,6 +22,7 @@ import org.springframework.http.ResponseEntity;
 
 import com.example.demo.db.entity.Book;
 import com.example.demo.db.repository.BookRepository;
+import com.example.demo.exception.NotFoundException;
 import com.example.demo.google.GoogleBookService;
 import com.example.demo.google.GoogleVolume;
 import com.example.demo.google.GoogleVolume.GoogleVolumeInfo;
@@ -66,6 +69,57 @@ class BookServiceTest {
 
         verify(googleBookService).getVolumeById(googleId);
         verifyNoMoreInteractions(googleBookService, bookRepository);
+    }
+    
+    @Test
+    void addBook_whenGoogleApiReturns404_doesNotPersist_andThrowsNotFound() {
+        String googleId = "missing-id";
+
+        when(googleBookService.getVolumeById(googleId))
+                .thenThrow(new NotFoundException("Volume missing-id not found"));
+
+        assertThatThrownBy(() -> bookService.addBook(googleId))
+                .isInstanceOf(NotFoundException.class)
+                .hasMessageContaining("missing-id");
+
+        verify(googleBookService).getVolumeById(googleId);
+        
+        verifyNoInteractions(bookRepository);
+    }
+    
+    @Test
+    void addBook_whenGoogleApiThrowsRuntimeError_doesNotPersist() {
+        String googleId = "abc123";
+
+        when(googleBookService.getVolumeById(googleId))
+                .thenThrow(new RuntimeException("Google Internal Error"));
+
+        assertThatThrownBy(() -> bookService.addBook(googleId))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessageContaining("Google Internal Error");
+
+        verify(googleBookService).getVolumeById(googleId);
+        verifyNoInteractions(bookRepository);
+    }
+    
+    @Test
+    void addBook_whenDbSaveFails_doesNotReturn201() {
+        String googleId = "abc123";
+        GoogleVolumeInfo info = new GoogleVolumeInfo("Effective Java",
+                List.of("Joshua Bloch"), 416);
+        GoogleVolume volume = new GoogleVolume(googleId, info);
+
+        when(googleBookService.getVolumeById(googleId)).thenReturn(volume);
+
+        when(bookRepository.save(any()))
+                .thenThrow(new RuntimeException("DB down"));
+
+        assertThatThrownBy(() -> bookService.addBook(googleId))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessageContaining("DB down");
+
+        verify(googleBookService).getVolumeById(googleId);
+        verify(bookRepository).save(any());
     }
 
 }

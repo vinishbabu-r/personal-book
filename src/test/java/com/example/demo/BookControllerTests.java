@@ -46,14 +46,26 @@ class BookControllerTests {
 	}
 
 	@Test
-	void testAddBook() throws Exception {
-		String googleId = "piOyzYqeZGgC";
+	void testAddBook_201() throws Exception {
+	    String googleId = "piOyzYqeZGgC";
 
-		//Empty Google ID
-		mockMvc.perform(post("/books/ ")).andExpect(status().isBadRequest());
-		
-		//Success Response - 404 if Quota exceeded for quota metric 'Queries' and limit 'Queries per day'
-		mockMvc.perform(post("/books/"+googleId)).andExpect(status().isCreated());
+	    mockMvc.perform(post("/books/" + googleId))
+	            .andExpect(status().isCreated())
+	            .andExpect(jsonPath("$.id").value(googleId))
+	            .andExpect(jsonPath("$.volumeInfo").exists())
+	            .andExpect(jsonPath("$.volumeInfo.title").value("Effective Java"))
+	            .andExpect(jsonPath("$.volumeInfo.authors[0]").value("Joshua Bloch"))
+	            .andExpect(jsonPath("$.volumeInfo.pageCount").value(265));
+	}
+	
+	@Test
+	void testAddBook_400() throws Exception {
+
+	    mockMvc.perform(post("/books/ "))
+	            .andExpect(status().isBadRequest())
+	            .andExpect(jsonPath("$.error").exists())
+	            .andExpect(jsonPath("$.message")
+	                    .value("Google ID must not be null or blank"));
 	}
 
 }
